@@ -40,8 +40,20 @@
                 android:inputType="textPersonName"
                 android:paddingLeft="15dp" />
 
-            <ImageButton
-                android:id="@+id/imageButton"
+            <!--<ImageButton-->
+                <!--android:id="@+id/imageButton"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="100dp"-->
+                <!--android:layout_marginBottom="5dp"-->
+                <!--android:layout_marginLeft="10dp"-->
+                <!--android:layout_marginRight="10dp"-->
+                <!--android:layout_marginTop="5dp"-->
+                <!--android:background="@android:color/holo_red_dark"-->
+                <!--app:srcCompat="@drawable/ic_add_a_photo_white_50dp"-->
+                <!--android:onClick="uploadImage"/>-->
+
+            <ImageView
+                android:id="@+id/imageView"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
                 android:layout_marginBottom="5dp"
@@ -50,20 +62,6 @@
                 android:layout_marginTop="5dp"
                 android:background="@android:color/holo_red_dark"
                 app:srcCompat="@drawable/ic_add_a_photo_white_50dp" />
-
-            <EditText
-                android:id="@+id/category"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginBottom="5dp"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginTop="5dp"
-                android:background="@drawable/edittext_left_border"
-                android:ems="10"
-                android:hint="Categorie"
-                android:inputType="textPersonName"
-                android:paddingLeft="15dp" />
 
             <EditText
                 android:id="@+id/tag"
@@ -139,7 +137,7 @@
                 android:textStyle="normal" />
 
             <EditText
-                android:id="@+id/ingredient"
+                android:id="@+id/ingredient1"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:layout_marginBottom="5dp"
@@ -148,16 +146,23 @@
                 android:layout_marginTop="5dp"
                 android:background="@drawable/edittext_left_border"
                 android:ems="10"
-                android:hint="Ingrediënten"
+                android:hint="ingredient"
                 android:inputType="textPersonName"
                 android:paddingLeft="15dp" />
+
+            <LinearLayout
+                android:id="@+id/ingredientLayout"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </LinearLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <ImageButton
-                    android:id="@+id/addStep"
+                    android:id="@+id/addIngredient"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
                     android:layout_alignParentRight="true"
@@ -192,9 +197,16 @@
                 android:layout_marginTop="5dp"
                 android:background="@drawable/edittext_left_border"
                 android:ems="10"
-                android:hint="Stap 1"
+                android:hint="stappenplan"
                 android:inputType="textPersonName"
                 android:paddingLeft="15dp" />
+
+            <LinearLayout
+                android:id="@+id/stepLayout"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+            </LinearLayout>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -211,7 +223,7 @@
             </RelativeLayout>
 
             <EditText
-                android:id="@+id/Comment"
+                android:id="@+id/comment"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:layout_marginBottom="5dp"
