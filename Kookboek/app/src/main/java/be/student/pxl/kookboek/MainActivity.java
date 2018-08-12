@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
        kookboekDBHelper = new KookboekDBHelper(this);
+       kookboekDBHelper.populateTags();
     }
 
     public void addRecipe(View view) {
@@ -30,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void goToMyRecipes(View view) {
-        Intent intent = new Intent(this, MyRecipesActivity.class);
+        Intent intent = new Intent(this, RecipeListActivity.class);
         startActivity(intent);
     }
 }
