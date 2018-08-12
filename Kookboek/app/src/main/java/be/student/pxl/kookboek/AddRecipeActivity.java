@@ -13,13 +13,19 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.Telephony;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -39,7 +45,7 @@ import be.student.pxl.kookboek.Data.KookboekDBHelper;
 import be.student.pxl.kookboek.Entities.Ingredient;
 import be.student.pxl.kookboek.Entities.Recipe;
 
-public class AddRecipeActivity extends AppCompatActivity implements View.OnClickListener {
+public class AddRecipeActivity extends AppCompatActivity implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener {
     private static final int RESULT_LOAD_IMAGE = 1;
     KookboekDBHelper kookboekDBHelper;
 
@@ -98,6 +104,15 @@ public class AddRecipeActivity extends AppCompatActivity implements View.OnClick
         addStep.setOnClickListener(this);
 
         tagLayout = (LinearLayout) findViewById(R.id.tagLayout);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
     }
 
     @Override
@@ -234,6 +249,36 @@ public class AddRecipeActivity extends AppCompatActivity implements View.OnClick
         if (requestCode == RESULT_LOAD_IMAGE && resultCode == RESULT_OK && data != null) {
             Uri selectedImage = data.getData();
             imageUpload.setImageURI(selectedImage);
+        }
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+        // Handle navigation view item clicks here.
+        int id = menuItem.getItemId();
+
+        if (id == R.id.nav_addRecipe) {
+            // Handle the camera action
+        } else if (id == R.id.nav_myRecipes) {
+
+        } else if (id == R.id.nav_Friends) {
+
+        } else if (id == R.id.nav_Mealplanner) {
+
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
         }
     }
 }

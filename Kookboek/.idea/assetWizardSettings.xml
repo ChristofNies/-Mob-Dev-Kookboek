@@ -18,12 +18,34 @@
                                 <PersistentState>
                                   <option name="children">
                                     <map>
+                                      <entry key="foregroundClipArt">
+                                        <value>
+                                          <PersistentState>
+                                            <option name="values">
+                                              <map>
+                                                <entry key="trimmed" value="true" />
+                                              </map>
+                                            </option>
+                                          </PersistentState>
+                                        </value>
+                                      </entry>
                                       <entry key="foregroundImage">
                                         <value>
                                           <PersistentState>
                                             <option name="values">
                                               <map>
-                                                <entry key="scalingPercent" value="60" />
+                                                <entry key="scalingPercent" value="107" />
+                                                <entry key="trimmed" value="true" />
+                                              </map>
+                                            </option>
+                                          </PersistentState>
+                                        </value>
+                                      </entry>
+                                      <entry key="foregroundText">
+                                        <value>
+                                          <PersistentState>
+                                            <option name="values">
+                                              <map>
                                                 <entry key="trimmed" value="true" />
                                               </map>
                                             </option>
@@ -34,8 +56,10 @@
                                   </option>
                                   <option name="values">
                                     <map>
-                                      <entry key="foregroundImage" value="D:\PXL\Mobile Development\icons\recipebook.png" />
-                                      <entry key="outputName" value="ic_recipebook" />
+                                      <entry key="backgroundLayerName" value="ic_recipebook_background" />
+                                      <entry key="foregroundImage" value="D:\PXL\Mobile Development\icons\nav_menu_image.jpg" />
+                                      <entry key="foregroundLayerName" value="ic_recipebook_foreground" />
+                                      <entry key="outputName" value="ic_menu_header_image" />
                                     </map>
                                   </option>
                                 </PersistentState>
