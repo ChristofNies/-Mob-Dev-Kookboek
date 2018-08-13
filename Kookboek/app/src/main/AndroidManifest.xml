@@ -30,6 +30,9 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="be.student.pxl.kookboek.RecipeListActivity" />
         </activity>
+        <provider
+            android:authorities="be.student.pxl.kookboek"
+            android:name=".Data.KookboekProvider" />
     </application>
 
 </manifest>

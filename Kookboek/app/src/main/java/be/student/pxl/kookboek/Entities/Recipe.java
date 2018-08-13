@@ -38,16 +38,6 @@ public class Recipe {
         steps = new ArrayList<String>();
     }
 
-//    public Recipe(String title, byte[] picture, String cookingTime, int numberOfPersons, byte[] photoRecipe, String description, String commentary) {
-//        this.title = title;
-//        this.picture = picture;
-//        this.cookingTime = cookingTime;
-//        this.numberOfPersons = numberOfPersons;
-//        this.photoRecipe = photoRecipe;
-//        this.description = description;
-//        this.commentary = commentary;
-//    }
-
     public int getId() {
         return id;
     }
@@ -119,14 +109,6 @@ public class Recipe {
     public void addStep(String step) {
         this.steps.add(step);
     }
-
-//    public byte[] getPhotoRecipe() {
-//        return photoRecipe;
-//    }
-//
-//    public void setPhotoRecipe(byte[] photoRecipe) {
-//        this.photoRecipe = photoRecipe;
-//    }
 
     public String getCommentary() {
         return commentary;
