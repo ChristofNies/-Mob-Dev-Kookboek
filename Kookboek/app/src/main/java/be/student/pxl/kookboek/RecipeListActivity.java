@@ -5,22 +5,29 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.media.Image;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import be.student.pxl.kookboek.Adapter.SimpleItemRecyclerViewAdapter;
 import be.student.pxl.kookboek.Data.KookboekDBHelper;
 import be.student.pxl.kookboek.Entities.Recipe;
 import be.student.pxl.kookboek.dummy.DummyContent;
@@ -37,7 +44,7 @@ import java.util.List;
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-public class RecipeListActivity extends AppCompatActivity {
+public class RecipeListActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -55,18 +62,10 @@ public class RecipeListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_list);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.list_toolbar);
+        toolbar.setTitle("Mijn recepten");
+        toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
-        toolbar.setTitle(getTitle());
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         if (findViewById(R.id.recipe_detail_container) != null) {
             // The detail container view will be present only in the
@@ -76,16 +75,21 @@ public class RecipeListActivity extends AppCompatActivity {
             mTwoPane = true;
         }
 
-//        if (res.getCount() <= 0) {
-//            LayoutInflater layoutInflater = (LayoutInflater) getBaseContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-//            CoordinatorLayout coordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinatorLayout);
-//            View emptyListView = layoutInflater.inflate(R.layout.empty_list_textview, null);
-//            coordinatorLayout.addView(emptyListView);
-//        } else {
-            View recyclerView = findViewById(R.id.recipe_list);
-            assert recyclerView != null;
-            setupRecyclerView((RecyclerView) recyclerView);
-//        }
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        // 2 manieren van wit maken werken niet... NAAM STAAT BLACK MAAR IS WIT
+        // Had ook in styles iets toegevoegd wat neit werkt
+        toggle.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        View recyclerView = findViewById(R.id.recipe_list);
+        assert recyclerView != null;
+        setupRecyclerView((RecyclerView) recyclerView);
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
@@ -105,73 +109,34 @@ public class RecipeListActivity extends AppCompatActivity {
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, recipeList, mTwoPane));
     }
 
-    public static class SimpleItemRecyclerViewAdapter
-            extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
+        // Handle navigation view item clicks here.
+        int id = menuItem.getItemId();
 
-        private final RecipeListActivity mParentActivity;
-        private final List<Recipe> mValues;
-        private final boolean mTwoPane;
-        private final View.OnClickListener mOnClickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Recipe recipe = (Recipe) view.getTag();
-                if (mTwoPane) {
-                    Bundle arguments = new Bundle();
-                    arguments.putSerializable("recipeId", recipe.getId());
-                    RecipeDetailFragment fragment = new RecipeDetailFragment();
-                    fragment.setArguments(arguments);
-                    mParentActivity.getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.recipe_detail_container, fragment)
-                            .commit();
-                } else {
-                    Context context = view.getContext();
-                    Intent intent = new Intent(context, RecipeDetailActivity.class);
-                    intent.putExtra("recipeId", recipe.getId());
+        if (id == R.id.nav_addRecipe) {
+            Intent intent = new Intent(this, AddRecipeActivity.class);
+            startActivity(intent);
+        } else if (id == R.id.nav_myRecipes) {
 
-                    context.startActivity(intent);
-                }
-            }
-        };
+        } else if (id == R.id.nav_Friends) {
 
-        SimpleItemRecyclerViewAdapter(RecipeListActivity parent,
-                                      List<Recipe> recipeList,
-                                      boolean twoPane) {
-            mValues = recipeList;
-            mParentActivity = parent;
-            mTwoPane = twoPane;
+        } else if (id == R.id.nav_Mealplanner) {
+
         }
 
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.recipe_list_content, parent, false);
-            return new ViewHolder(view);
-        }
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
 
-        @Override
-        public void onBindViewHolder(final ViewHolder holder, int position) {
-            holder.mTitleView.setText(mValues.get(position).getTitle());
-            Bitmap bitmap = BitmapFactory.decodeByteArray(mValues.get(position).getPicture(), 0, mValues.get(position).getPicture().length);
-            holder.mImageView.setImageBitmap(bitmap);
-
-            holder.itemView.setTag(mValues.get(position));
-            holder.itemView.setOnClickListener(mOnClickListener);
-        }
-
-        @Override
-        public int getItemCount() {
-            return mValues.size();
-        }
-
-        class ViewHolder extends RecyclerView.ViewHolder {
-            final TextView mTitleView;
-            final ImageView mImageView;
-
-            ViewHolder(View view) {
-                super(view);
-                mTitleView = (TextView) view.findViewById(R.id.recipe_title);
-                mImageView = (ImageView) view.findViewById(R.id.recipe_photo);
-            }
+    @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
         }
     }
 }

@@ -4,46 +4,70 @@
     android:id="@+id/recipe_detail"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="10dp"
+    android:orientation="vertical"
     android:textIsSelectable="true"
-    tools:context=".RecipeDetailFragment"
-    android:orientation="vertical">
+    tools:context=".RecipeDetailFragment">
 
     <ImageView
         android:id="@+id/recipe_photo"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_margin="10dp"
+        android:layout_height="200dp"
+        android:scaleType="fitXY"/>
+
     <TextView
         android:id="@+id/description"
+
+        android:layout_margin="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-    <LinearLayout
+
+    <RelativeLayout
         android:id="@+id/detailChildLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:weightSum="4">
+
+        android:layout_margin="10dp" >
+
         <TextView
             android:id="@+id/numberOfPersons"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="3"/>
+            android:layout_alignParentLeft="true" />
+
         <TextView
             android:id="@+id/time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"/>
-    </LinearLayout>
+            android:layout_alignParentRight="true" />
+    </RelativeLayout>
+
     <TextView
         android:id="@+id/ingredients"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:background="@drawable/bordered_textview"
+        android:padding="10dp"
+
+        android:layout_margin="10dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:text="STAPPENPLAN"/>
     <TextView
         android:id="@+id/steps"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+
+        android:layout_margin="10dp"/>
+
     <TextView
         android:id="@+id/comment"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_margin="10dp" />
 </LinearLayout>

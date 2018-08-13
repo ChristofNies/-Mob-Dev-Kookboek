@@ -108,6 +108,9 @@ public class AddRecipeActivity extends AppCompatActivity implements View.OnClick
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        // 2 manieren van wit maken werken niet... NAAM STAAT BLACK MAAR IS WIT
+        // Had ook in styles iets toegevoegd wat neit werkt
+        toggle.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
@@ -260,7 +263,8 @@ public class AddRecipeActivity extends AppCompatActivity implements View.OnClick
         if (id == R.id.nav_addRecipe) {
             // Handle the camera action
         } else if (id == R.id.nav_myRecipes) {
-
+            Intent intent = new Intent(this, RecipeListActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_Friends) {
 
         } else if (id == R.id.nav_Mealplanner) {
