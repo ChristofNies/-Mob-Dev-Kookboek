@@ -64,7 +64,7 @@ public class KookboekContract {
 
     public static final class IngredientEntry implements BaseColumns {
         public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath(PATH_RECIPE).build();
+              BASE_CONTENT_URI.buildUpon().appendPath(PATH_INGREDIENT).build();
 
         public static final String CONTENT_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_RECIPE;
@@ -92,7 +92,7 @@ public class KookboekContract {
 
     public static final class StepEntry implements BaseColumns {
         public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath(PATH_RECIPE).build();
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_STEP).build();
 
         public static final String CONTENT_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_RECIPE;
@@ -119,7 +119,7 @@ public class KookboekContract {
 
     public static final class TagsOfRecipeEntry implements BaseColumns {
         public static final Uri CONTENT_URI =
-                BASE_CONTENT_URI.buildUpon().appendPath(PATH_RECIPE).build();
+                BASE_CONTENT_URI.buildUpon().appendPath(PATH_TAGS_OF_RECIPE).build();
 
         public static final String CONTENT_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_RECIPE;

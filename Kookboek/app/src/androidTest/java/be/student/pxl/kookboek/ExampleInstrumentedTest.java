@@ -7,6 +7,8 @@ import android.support.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import be.student.pxl.kookboek.Data.KookboekContract;
+
 import static org.junit.Assert.*;
 
 /**
@@ -22,5 +24,19 @@ public class ExampleInstrumentedTest {
         Context appContext = InstrumentationRegistry.getTargetContext();
 
         assertEquals("be.student.pxl.kookboek", appContext.getPackageName());
+    }
+
+
+    @Test
+    public void testGetType() {
+        String type = InstrumentationRegistry.getTargetContext().getContentResolver().getType(
+                KookboekContract.IngredientEntry.buildIngredientRecipe(1));
+        assertEquals("Error: IngredientEnty CONTENT_URI with recipeId should return IngredientEntry.CONTENT_TYPE",
+                KookboekContract.IngredientEntry.CONTENT_TYPE, type);
+    }
+
+    @Test
+    public void testRecipeIngredientsQuery() {
+
     }
 }

@@ -13,7 +13,7 @@ import be.student.pxl.kookboek.Entities.Ingredient;
 import be.student.pxl.kookboek.Entities.Recipe;
 
 public class KookboekDBHelper extends SQLiteOpenHelper {
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 7;
     private static final String DATABASE_NAME = "kookboek.db";
 
     public KookboekDBHelper(Context context) {
@@ -26,15 +26,15 @@ public class KookboekDBHelper extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE " + KookboekContract.RecipeEntry.TABLE_NAME + " (" +
                 KookboekContract.RecipeEntry._ID + " INTEGER PRIMARY KEY, " +
                 KookboekContract.RecipeEntry.COLUMN_TITLE + " TEXT UNIQUE, " +
-                KookboekContract.RecipeEntry.COLUMN_PICTURE + " BLOB, " +
+                KookboekContract.RecipeEntry.COLUMN_PICTURE + ", " +
                 KookboekContract.RecipeEntry.COLUMN_NUMBER_OF_PERSONS + ", " +
                 KookboekContract.RecipeEntry.COLUMN_COOKING_TIME + ", " +
                 KookboekContract.RecipeEntry.COLUMN_DESCRIPTION + ", " +
                 KookboekContract.RecipeEntry.COLUMN_COMMENTARY + ")");
 
         db.execSQL("CREATE TABLE " + KookboekContract.TagEntry.TABLE_NAME + " (" +
-                KookboekContract.TagEntry._ID + "INTEGER PRIMARY KEY, " +
-                KookboekContract.TagEntry.COLUMN_NAME + "TEXT)");
+                KookboekContract.TagEntry._ID + " INTEGER PRIMARY KEY, " +
+                KookboekContract.TagEntry.COLUMN_NAME + " TEXT)");
 
         db.execSQL("CREATE TABLE " + KookboekContract.IngredientEntry.TABLE_NAME + " (" +
                 KookboekContract.IngredientEntry._ID + " INTEGER PRIMARY KEY," +
@@ -69,25 +69,6 @@ public class KookboekDBHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + KookboekContract.StepEntry.TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + KookboekContract.TagsOfRecipeEntry.TABLE_NAME);
         onCreate(db);
-    }
-    public Cursor getAllTags() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor res = db.rawQuery("SELECT * FROM " + KookboekContract.TagEntry.TABLE_NAME, null);
-        return res;
-    }
-
-    public void populateTags() {
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor allTags = getAllTags();
-
-        if (allTags.getCount() == 0) {
-            String[] tags = {"Hoofdgerecht", "Voorgerecht", "Dessert", "Vis", "Vlees", "Veggie", "Soep", "Gezond", "Snack"};
-            ContentValues contentValues = new ContentValues();
-            for (int i = 0; i <= tags.length; i++) {
-                contentValues.put("name", tags[i]);
-                db.insert(KookboekContract.TagEntry.TABLE_NAME, null, contentValues);
-            }
-        }
     }
 }
 

@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.PorterDuff;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,6 +14,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.firebase.ui.storage.images.FirebaseImageLoader;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import java.io.File;
 import java.util.List;
 
 import be.student.pxl.kookboek.Entities.Recipe;
@@ -22,6 +31,7 @@ import be.student.pxl.kookboek.RecipeListActivity;
 
 public class SimpleItemRecyclerViewAdapter
         extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
+    private FirebaseStorage storage = FirebaseStorage.getInstance();
 
     private final RecipeListActivity mParentActivity;
     private final List<Recipe> mValues;
@@ -65,10 +75,13 @@ public class SimpleItemRecyclerViewAdapter
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mTitleView.setText(mValues.get(position).getTitle());
-        Bitmap bitmap = BitmapFactory.decodeByteArray(mValues.get(position).getPicture(), 0, mValues.get(position).getPicture().length);
-        holder.mImageView.setImageBitmap(bitmap);
+        StorageReference storageRef  = storage.getReferenceFromUrl(mValues.get(position).getPicture());
 
+        holder.mTitleView.setText(mValues.get(position).getTitle());
+        Glide.with(mParentActivity)
+                .using(new FirebaseImageLoader())
+                .load(storageRef)
+                .into(holder.mImageView);
         holder.itemView.setTag(mValues.get(position));
         holder.itemView.setOnClickListener(mOnClickListener);
     }

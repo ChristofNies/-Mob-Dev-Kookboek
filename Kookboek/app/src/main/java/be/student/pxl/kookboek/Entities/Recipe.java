@@ -6,12 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Recipe {
-    private int id;
+    private long id;
     private String title;
-    private byte[] picture;
+    private String picture;
     private String cookingTime;
     private int numberOfPersons;
-    //private byte[] photoRecipe;
     private String description;
     private String commentary;
 
@@ -25,7 +24,7 @@ public class Recipe {
         steps = new ArrayList<String>();
     }
 
-    public Recipe(int id, String title, byte[] picture, String cookingTime, int numberOfPersons, String description, String commentary) {
+    public Recipe(int id, String title, String picture, String cookingTime, int numberOfPersons, String description, String commentary) {
         this.id = id;
         this.title = title;
         this.picture = picture;
@@ -38,11 +37,11 @@ public class Recipe {
         steps = new ArrayList<String>();
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -54,11 +53,11 @@ public class Recipe {
         this.title = title;
     }
 
-    public byte[] getPicture() {
+    public String getPicture() {
         return picture;
     }
 
-    public void setPicture(byte[] picture) {
+    public void setPicture(String picture) {
         this.picture = picture;
     }
 

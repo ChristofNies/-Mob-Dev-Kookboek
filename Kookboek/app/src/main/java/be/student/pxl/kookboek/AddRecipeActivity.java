@@ -1,6 +1,8 @@
 package be.student.pxl.kookboek;
 
 import android.Manifest;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -37,58 +39,53 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
+import be.student.pxl.kookboek.Data.KookboekContract;
 import be.student.pxl.kookboek.Data.KookboekDBHelper;
 import be.student.pxl.kookboek.Entities.Ingredient;
 import be.student.pxl.kookboek.Entities.Recipe;
 
 public class AddRecipeActivity extends AppCompatActivity implements View.OnClickListener, NavigationView.OnNavigationItemSelectedListener {
+    private FirebaseStorage storage = FirebaseStorage.getInstance();
     private static final int RESULT_LOAD_IMAGE = 1;
-    KookboekDBHelper kookboekDBHelper;
 
-    ImageView imageUpload;
-    EditText title, time, quantity, description, comment, ingredient1, step;
-    TextView addTag;
-    Button save;
+    private ImageView imageUpload;
+    private TextView addTag;
+    private Button save;
+    private ImageButton addIngredient, addStep;
+    private LinearLayout ingredientLayout, stepLayout, tagLayout;
 
-    Recipe recipe;
-
-    ImageButton addIngredient, addStep;
-    LinearLayout ingredientLayout, stepLayout, tagLayout;
-
-    List<String> tagList = new ArrayList<>();
-    List<Integer> recipeTags = new ArrayList<>();
-    CharSequence[] tagSeq;
-    boolean[] checkedItems;
+    private String path;
+    private List<String> tagList = new ArrayList<>();
+    private List<Integer> recipeTags = new ArrayList<>();
+    private CharSequence[] tagSeq;
+    private boolean[] checkedItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        kookboekDBHelper = new KookboekDBHelper(this);
-        Cursor getTags = kookboekDBHelper.getAllTags();
-
-        while(getTags.moveToNext()) {
-            tagList.add(getTags.getString(1));
-        }
-        checkedItems = new boolean[tagList.size()];
-        tagSeq = tagList.toArray(new CharSequence[tagList.size()]);
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_recipe);
+
+        setTags();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
         toolbar.setTitle(R.string.add_recipes);
         toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
 
-        title = (EditText) findViewById(R.id.title);
-        time = (EditText) findViewById(R.id.time);
-        quantity = (EditText) findViewById(R.id.quantity);
-        description = (EditText) findViewById(R.id.description);
-        comment = (EditText) findViewById(R.id.comment);
-        ingredient1 = (EditText) findViewById(R.id.ingredient1);
-        step = (EditText) findViewById(R.id.step);
         addTag = (TextView) findViewById(R.id.addTag);
         addTag.setOnClickListener(this);
         imageUpload = (ImageView) findViewById(R.id.imageView);
@@ -142,55 +139,41 @@ public class AddRecipeActivity extends AppCompatActivity implements View.OnClick
                 break;
 
             case R.id.save:
-                // make a byte array of the image
                 // TODO: if image upload = vectordrawable than use standard picture
-                Bitmap image = ((BitmapDrawable) imageUpload.getDrawable()).getBitmap();
+                Bitmap bitmap = ((BitmapDrawable) imageUpload.getDrawable()).getBitmap();
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                image.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
                 byte[] byteArrayImage = byteArrayOutputStream.toByteArray();
 
-                recipe = new Recipe();
-                // make the recipe
-                recipe.setTitle(title.getText().toString());
-                recipe.setNumberOfPersons(Integer.parseInt(quantity.getText().toString()));
-                recipe.setCookingTime(time.getText().toString());
-                recipe.setDescription(description.getText().toString());
-                recipe.setCommentary(comment.getText().toString());
-                recipe.setPicture(byteArrayImage);
-                for (int i = 0; i < recipeTags.size(); i++) {
-                    if (recipeTags.get(i) != null)
-                        recipe.addTagId(recipeTags.get(i));
-                }
-                Ingredient ingredient = new Ingredient(ingredient1.getText().toString().substring(0,
-                        ingredient1.getText().toString().indexOf(" ")),
-                        ingredient1.getText().toString().substring(ingredient1.getText().toString().indexOf(" ") + 1,
-                                ingredient1.getText().toString().length()));
-                recipe.addIngredient(ingredient);
-                for (int i = 0; i < ingredientLayout.getChildCount(); i++) {
-                        View viewI = (View) ingredientLayout.getChildAt(i);
-                        EditText editTextI = (EditText) viewI.findViewById(R.id.newTextBox);
-                        ingredient = new Ingredient(editTextI.getText().toString().substring(0,
-                            editTextI.getText().toString().indexOf(" ")),
-                            editTextI.getText().toString().substring(editTextI.getText().toString().indexOf(" ") + 1,
-                                    editTextI.getText().toString().length()));
-                        recipe.addIngredient(ingredient);
-                }
-                recipe.addStep(step.getText().toString());
-                for (int i = 0; i < stepLayout.getChildCount(); i++) {
-                    View viewS = (View) stepLayout.getChildAt(i);
-                    EditText editTextS = (EditText) viewS.findViewById(R.id.newTextBox);
-                    recipe.addStep(editTextS.getText().toString());
-                }
+                String path = "gerechten/" + UUID.randomUUID() + ".png";
+                final StorageReference gerechtenRef = storage.getReference(path);
 
-                // add to db
-                boolean isInserted = kookboekDBHelper.addRecipe(recipe);
+                gerechtenRef.putBytes(byteArrayImage).continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                    @Override
+                    public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                        if(!task.isSuccessful()) {
+                            throw task.getException();
+                        }
+                        return gerechtenRef.getDownloadUrl();
+                    }
+                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Uri> task) {
+                        if (task.isSuccessful()) {
+                            Uri downloadUri = task.getResult();
+                            saveRecipe(downloadUri.toString());
 
-                // toast message if it worked or not
-                if (isInserted) {
-                    Toast.makeText(AddRecipeActivity.this, "Recept toegevoegd", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(AddRecipeActivity.this, "Er is iets foutgelopen", Toast.LENGTH_SHORT).show();
-                }
+                            long recipeId = findRecipeId();
+                            saveIngredients(recipeId);
+                            saveSteps(recipeId);
+                            saveTags(recipeId);
+
+                            Toast.makeText(AddRecipeActivity.this, "Recept toegevoegd", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(AddRecipeActivity.this, "Recept kon niet opgeslagen worden", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
                 break;
 
             case R.id.addTag:
@@ -283,6 +266,143 @@ public class AddRecipeActivity extends AppCompatActivity implements View.OnClick
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
+        }
+    }
+
+    private void setTags() {
+        ContentResolver resolver = getContentResolver();
+        String[] projection = new String[]{KookboekContract.TagEntry._ID, KookboekContract.TagEntry.COLUMN_NAME};
+        Cursor cursor = resolver.query(KookboekContract.TagEntry.CONTENT_URI, projection, null,null, null);
+
+        while (cursor.moveToNext()) {
+            tagList.add(cursor.getString(1));
+        }
+
+        checkedItems = new boolean[tagList.size()];
+        tagSeq = tagList.toArray(new CharSequence[tagList.size()]);
+    }
+
+    private long findRecipeId() {
+        long recipeId = -1;
+        ContentResolver resolver = getContentResolver();
+        String[] projection = new String[]{KookboekContract.RecipeEntry._ID};
+        EditText title = (EditText) findViewById(R.id.title);
+        String[] selectionArgs = new String[]{title.getText().toString()};
+        String selection = KookboekContract.RecipeEntry.TABLE_NAME + "." +
+                KookboekContract.RecipeEntry.COLUMN_TITLE + " = ?";
+        Cursor cursor = resolver.query(KookboekContract.RecipeEntry.CONTENT_URI,
+                projection,
+                selection,
+                selectionArgs,
+                null);
+        while (cursor.moveToNext()) {
+            recipeId = cursor.getLong(0);
+        }
+        return recipeId;
+    }
+
+    private void saveRecipe(String downloadUrl) {
+        ContentResolver resolver = getContentResolver();
+        ContentValues recipeValues = new ContentValues();
+
+        EditText title = (EditText) findViewById(R.id.title);
+        EditText quantity = (EditText) findViewById(R.id.quantity);
+        EditText time = (EditText) findViewById(R.id.time);
+        EditText description = (EditText) findViewById(R.id.description);
+        EditText comment = (EditText) findViewById(R.id.comment);
+
+        recipeValues.put(KookboekContract.RecipeEntry.COLUMN_TITLE,
+                title.getText().toString());
+        recipeValues.put(KookboekContract.RecipeEntry.COLUMN_PICTURE,
+                downloadUrl);
+        recipeValues.put(KookboekContract.RecipeEntry.COLUMN_NUMBER_OF_PERSONS,
+                quantity.getText().toString());
+        recipeValues.put(KookboekContract.RecipeEntry.COLUMN_COOKING_TIME,
+                time.getText().toString());
+        recipeValues.put(KookboekContract.RecipeEntry.COLUMN_DESCRIPTION,
+                description.getText().toString());
+        recipeValues.put(KookboekContract.RecipeEntry.COLUMN_COMMENTARY,
+                comment.getText().toString());
+
+        resolver.insert(KookboekContract.RecipeEntry.CONTENT_URI, recipeValues);
+    }
+
+    private void saveIngredients(long recipeId) {
+        ContentResolver resolver = getContentResolver();
+        ContentValues ingredientValues = new ContentValues();
+
+        EditText ingredient1 = (EditText) findViewById(R.id.ingredient1);
+        Ingredient ingredient = new Ingredient(ingredient1.getText().toString().substring(0,
+                ingredient1.getText().toString().indexOf(" ")),
+                ingredient1.getText().toString().substring(ingredient1.getText().toString().indexOf(" ") + 1,
+                        ingredient1.getText().toString().length()));
+
+        ingredientValues.put(KookboekContract.IngredientEntry.COLUMN_RECIPE_ID,
+                recipeId);
+        ingredientValues.put(KookboekContract.IngredientEntry.COLUMN_AMOUNT,
+                ingredient.getAmount());
+        ingredientValues.put(KookboekContract.IngredientEntry.COLUMN_DESCRIPTION,
+                ingredient.getDescription());
+
+        resolver.insert(KookboekContract.IngredientEntry.CONTENT_URI, ingredientValues);
+
+        for (int i = 0; i < ingredientLayout.getChildCount(); i++) {
+            View newIngredientLayout = (View) ingredientLayout.getChildAt(i);
+            EditText newIngredient = newIngredientLayout.findViewById(R.id.newTextBox);
+            ingredient = new Ingredient(newIngredient.getText().toString().substring(0,
+                    newIngredient.getText().toString().indexOf(" ")),
+                    newIngredient.getText().toString().substring(newIngredient.getText().toString().indexOf(" ") + 1,
+                            newIngredient.getText().toString().length()));
+
+            ingredientValues.put(KookboekContract.IngredientEntry.COLUMN_RECIPE_ID,
+                    recipeId);
+            ingredientValues.put(KookboekContract.IngredientEntry.COLUMN_AMOUNT,
+                    ingredient.getAmount());
+            ingredientValues.put(KookboekContract.IngredientEntry.COLUMN_DESCRIPTION,
+                    ingredient.getDescription());
+
+            resolver.insert(KookboekContract.IngredientEntry.CONTENT_URI, ingredientValues);
+        }
+    }
+
+    private void saveSteps(long recipeId) {
+        ContentResolver resolver = getContentResolver();
+        ContentValues stepValues = new ContentValues();
+
+        EditText newStep = (EditText) findViewById(R.id.step);
+
+        stepValues.put(KookboekContract.StepEntry.COLUMN_RECIPE_ID,
+                recipeId);
+        stepValues.put(KookboekContract.StepEntry.COLUMN_DESCRIPTION,
+                newStep.getText().toString());
+
+        resolver.insert(KookboekContract.StepEntry.CONTENT_URI, stepValues);
+
+        for (int i = 0; i < stepLayout.getChildCount(); i++) {
+            View newStepLayout = (View) stepLayout.getChildAt(i);
+            newStep = newStepLayout.findViewById(R.id.newTextBox);
+
+            stepValues.put(KookboekContract.StepEntry.COLUMN_RECIPE_ID,
+                    recipeId);
+            stepValues.put(KookboekContract.StepEntry.COLUMN_DESCRIPTION,
+                    newStep.getText().toString());
+
+            resolver.insert(KookboekContract.StepEntry.CONTENT_URI, stepValues);
+        }
+    }
+
+    private void saveTags(long recipeId) {
+        ContentResolver resolver = getContentResolver();
+        ContentValues tagValues = new ContentValues();
+
+        for (int i = 0; i < recipeTags.size(); i++) {
+            if (recipeTags.get(i) != null) {
+                tagValues.put(KookboekContract.TagsOfRecipeEntry.COLUMN_RECIPE_ID,
+                        recipeId);
+                tagValues.put(KookboekContract.TagsOfRecipeEntry.COLUMN_TAG_ID,
+                        recipeTags.get(i));
+            }
+            resolver.insert(KookboekContract.TagsOfRecipeEntry.CONTENT_URI, tagValues);
         }
     }
 }

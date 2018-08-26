@@ -23,10 +23,13 @@ public class KookboekProvider extends ContentProvider {
     private static final int TAG_ID = 201;
 
     private static final int INGREDIENT = 300;
+    private static final int INGREDIENT_RECIPE_ID = 301;
 
     private static final int STEP = 400;
+    private static final int STEP_RECIPE_ID = 401;
 
     private static final int TAG_OF_RECIPE = 500;
+    private static final int TAG_RECIPE_ID = 501;
 
     private KookboekDBHelper kookboekDBHelper;
     private static final SQLiteQueryBuilder queryBuilder;
@@ -70,11 +73,14 @@ public class KookboekProvider extends ContentProvider {
         matcher.addURI(authority, KookboekContract.PATH_TAG, TAG);
         matcher.addURI(authority, KookboekContract.PATH_TAG + "/#", TAG_ID);
 
-        matcher.addURI(authority, KookboekContract.PATH_INGREDIENT + "/#", INGREDIENT);
+        matcher.addURI(authority, KookboekContract.PATH_INGREDIENT, INGREDIENT);
+        matcher.addURI(authority, KookboekContract.PATH_INGREDIENT + "/#", INGREDIENT_RECIPE_ID);
 
-        matcher.addURI(authority, KookboekContract.PATH_STEP + "/#", STEP);
+        matcher.addURI(authority, KookboekContract.PATH_STEP, STEP);
+        matcher.addURI(authority, KookboekContract.PATH_STEP + "/#", STEP_RECIPE_ID);
 
-        matcher.addURI(authority, KookboekContract.PATH_TAGS_OF_RECIPE + "/#", TAG_OF_RECIPE);
+        matcher.addURI(authority, KookboekContract.PATH_TAGS_OF_RECIPE, TAG_OF_RECIPE);
+        matcher.addURI(authority, KookboekContract.PATH_TAGS_OF_RECIPE + "/#", TAG_RECIPE_ID);
 
         return matcher;
     }
@@ -83,6 +89,38 @@ public class KookboekProvider extends ContentProvider {
     public boolean onCreate() {
         kookboekDBHelper = new KookboekDBHelper(getContext());
         return true;
+    }
+
+
+    @Nullable
+    @Override
+    public String getType(@NonNull Uri uri) {
+        final int match = uriMatcher.match(uri);
+
+        switch (match) {
+            case RECIPE:
+                return KookboekContract.RecipeEntry.CONTENT_TYPE;
+            case RECIPE_ID:
+                return KookboekContract.RecipeEntry.CONTENT_ITEM_TYPE;
+            case TAG:
+                return KookboekContract.TagEntry.CONTENT_TYPE;
+            case TAG_ID:
+                return KookboekContract.TagEntry.CONTENT_ITEM_TYPE;
+            case INGREDIENT:
+                return KookboekContract.IngredientEntry.CONTENT_ITEM_TYPE;
+            case INGREDIENT_RECIPE_ID:
+                return KookboekContract.IngredientEntry.CONTENT_TYPE;
+            case STEP:
+                return KookboekContract.StepEntry.CONTENT_ITEM_TYPE;
+            case STEP_RECIPE_ID:
+                return KookboekContract.StepEntry.CONTENT_TYPE;
+            case TAG_OF_RECIPE:
+                return KookboekContract.TagsOfRecipeEntry.CONTENT_ITEM_TYPE;
+            case TAG_RECIPE_ID:
+                return KookboekContract.TagEntry.CONTENT_TYPE;
+            default:
+                throw new UnsupportedOperationException("Unknown uri: " + uri);
+        }
     }
 
     @Nullable
@@ -139,13 +177,22 @@ public class KookboekProvider extends ContentProvider {
                         sortOrder
                 );
                 break;
-            case INGREDIENT:
-                retCursor = getIngredientsByRecipeId(uri, projection, sortOrder);
+            case INGREDIENT_RECIPE_ID:
+                //retCursor = getIngredientsByRecipeId(uri, projection, sortOrder);
+                retCursor = kookboekDBHelper.getReadableDatabase().query(
+                        KookboekContract.IngredientEntry.TABLE_NAME,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder
+                );
                 break;
-            case STEP:
+            case STEP_RECIPE_ID:
                 retCursor = getStepsByRecipeId(uri, projection, sortOrder);
                 break;
-            case TAG_OF_RECIPE:
+            case TAG_RECIPE_ID:
                 retCursor = getTagsByRecipeId(uri, projection, sortOrder);
                 break;
             default:
@@ -154,31 +201,6 @@ public class KookboekProvider extends ContentProvider {
 
         retCursor.setNotificationUri(getContext().getContentResolver(), uri);
         return retCursor;
-    }
-
-    @Nullable
-    @Override
-    public String getType(@NonNull Uri uri) {
-        final int match = uriMatcher.match(uri);
-
-        switch (match) {
-            case RECIPE:
-                return KookboekContract.RecipeEntry.CONTENT_TYPE;
-            case RECIPE_ID:
-                return KookboekContract.RecipeEntry.CONTENT_ITEM_TYPE;
-            case TAG:
-                return KookboekContract.TagEntry.CONTENT_TYPE;
-            case TAG_ID:
-                return KookboekContract.TagEntry.CONTENT_ITEM_TYPE;
-            case INGREDIENT:
-                return KookboekContract.IngredientEntry.CONTENT_TYPE;
-            case STEP:
-                return KookboekContract.StepEntry.CONTENT_TYPE;
-            case TAG_OF_RECIPE:
-                return KookboekContract.TagEntry.CONTENT_TYPE;
-            default:
-                throw new UnsupportedOperationException("Unknown uri: " + uri);
-        }
     }
 
     @Nullable
@@ -193,31 +215,39 @@ public class KookboekProvider extends ContentProvider {
                 if (_id > 0) {
                     returnUri = KookboekContract.RecipeEntry.buildRecipeUri(_id);
                 } else {
-                    throw new UnsupportedOperationException("Unable to insert row int: " + uri);
+                    throw new UnsupportedOperationException("Unable to insert row in: " + uri);
                 }
                 break;
             case INGREDIENT:
                 _id = kookboekDBHelper.getWritableDatabase().insert(KookboekContract.IngredientEntry.TABLE_NAME, null, contentValues);
                 if (_id > 0) {
-                    returnUri = KookboekContract.RecipeEntry.buildRecipeUri(_id);
+                    returnUri = KookboekContract.IngredientEntry.buildIngredientUri(_id);
                 } else {
-                    throw new UnsupportedOperationException("Unable to insert row int: " + uri);
+                    throw new UnsupportedOperationException("Unable to insert row in: " + uri);
                 }
                 break;
             case STEP:
                 _id = kookboekDBHelper.getWritableDatabase().insert(KookboekContract.StepEntry.TABLE_NAME, null, contentValues);
                 if (_id > 0) {
-                    returnUri = KookboekContract.RecipeEntry.buildRecipeUri(_id);
+                    returnUri = KookboekContract.StepEntry.buildStepUri(_id);
                 } else {
-                    throw new UnsupportedOperationException("Unable to insert row int: " + uri);
+                    throw new UnsupportedOperationException("Unable to insert row in: " + uri);
+                }
+                break;
+            case TAG:
+                _id = kookboekDBHelper.getWritableDatabase().insert(KookboekContract.TagEntry.TABLE_NAME, null, contentValues);
+                if (_id > 0) {
+                    returnUri = KookboekContract.TagEntry.buildTagUri(_id);
+                } else {
+                    throw new UnsupportedOperationException("Unable to insert row in: " + uri);
                 }
                 break;
             case TAG_OF_RECIPE:
                 _id = kookboekDBHelper.getWritableDatabase().insert(KookboekContract.TagsOfRecipeEntry.TABLE_NAME, null, contentValues);
                 if (_id > 0) {
-                    returnUri = KookboekContract.RecipeEntry.buildRecipeUri(_id);
+                    returnUri = KookboekContract.TagsOfRecipeEntry.buildTagsOfRecipeUri(_id);
                 } else {
-                    throw new UnsupportedOperationException("Unable to insert row int: " + uri);
+                    throw new UnsupportedOperationException("Unable to insert row in: " + uri);
                 }
                 break;
             default:
@@ -291,10 +321,9 @@ public class KookboekProvider extends ContentProvider {
         long recipeId = KookboekContract.IngredientEntry.getRecipeIdFromUri(uri);
 
         String[] selectionArgs = new String[]{Long.toString(recipeId)};
-        String selection = KookboekContract.IngredientEntry.TABLE_NAME + "." +
-                KookboekContract.IngredientEntry.COLUMN_RECIPE_ID + " = ?";
+        String selection = KookboekContract.IngredientEntry.COLUMN_RECIPE_ID + " = ?";
 
-        return queryBuilder.query(kookboekDBHelper.getReadableDatabase(),
+        return kookboekDBHelper.getReadableDatabase().query(KookboekContract.IngredientEntry.TABLE_NAME,
                 projection,
                 selection,
                 selectionArgs,
@@ -333,13 +362,15 @@ public class KookboekProvider extends ContentProvider {
                 null,
                 null,
                 sortOrder);
-        List<Long> tagIds = new ArrayList<>();
+        List<String> tagIds = new ArrayList<>();
 
         while (tagIdsCursor.moveToNext()) {
-            tagIds.add(tagIdsCursor.getLong(2));
+            tagIds.add(Long.toString(tagIdsCursor.getLong(2)));
         }
 
-        selectionArgs = (String[]) tagIds.toArray();
+        selectionArgs = new String[tagIds.size()];
+        tagIds.toArray(selectionArgs);
+
         selection = KookboekContract.TagEntry.TABLE_NAME + "." +
                 KookboekContract.TagEntry._ID + " IN (";
 

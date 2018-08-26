@@ -1,8 +1,10 @@
 package be.student.pxl.kookboek;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -28,6 +30,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import be.student.pxl.kookboek.Adapter.SimpleItemRecyclerViewAdapter;
+import be.student.pxl.kookboek.Data.KookboekContract;
 import be.student.pxl.kookboek.Data.KookboekDBHelper;
 import be.student.pxl.kookboek.Entities.Recipe;
 import be.student.pxl.kookboek.dummy.DummyContent;
@@ -51,14 +54,9 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
      * device.
      */
     private boolean mTwoPane;
-    Cursor res;
-    KookboekDBHelper kookboekDBHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        kookboekDBHelper = new KookboekDBHelper(this);
-        res = kookboekDBHelper.getAllRecipes();
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recipe_list);
 
@@ -93,20 +91,7 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
     }
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
-        List<Recipe> recipeList = new ArrayList<>();
-        while (res.moveToNext()) {
-            Recipe recipe = new Recipe();
-            recipe.setId(res.getInt(0));
-            recipe.setTitle(res.getString(1));
-            recipe.setPicture(res.getBlob(2));
-            recipe.setCookingTime(res.getString(3));
-            recipe.setNumberOfPersons(res.getInt(4));
-            recipe.setDescription(res.getString(6));
-            recipe.setCommentary(res.getString(7));
-            recipeList.add(recipe);
-        }
-
-        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, recipeList, mTwoPane));
+        recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(this, getAllRecipes(), mTwoPane));
     }
 
     @Override
@@ -138,5 +123,25 @@ public class RecipeListActivity extends AppCompatActivity implements NavigationV
         } else {
             super.onBackPressed();
         }
+    }
+
+    private List<Recipe> getAllRecipes() {
+        ContentResolver resolver = getContentResolver();
+        // loopt vast als cursor te groot is, oplossing door in de while loop de foto's per recept apart op te halen #goedkope oplossing
+        // lost niks op zorg voor kleine formaat foto's
+        String[] projection = new String[]{KookboekContract.RecipeEntry._ID, KookboekContract.RecipeEntry.COLUMN_TITLE,
+                KookboekContract.RecipeEntry.COLUMN_PICTURE};
+        Cursor cursor = resolver.query(KookboekContract.RecipeEntry.CONTENT_URI, projection, null, null, null);
+        List<Recipe> recipeList = new ArrayList<>();
+
+        while (cursor.moveToNext()) {
+            Recipe recipe = new Recipe();
+            recipe.setId(cursor.getLong(0));
+            recipe.setTitle(cursor.getString(1));
+            recipe.setPicture(cursor.getString(2));
+            recipeList.add(recipe);
+        }
+
+        return recipeList;
     }
 }
